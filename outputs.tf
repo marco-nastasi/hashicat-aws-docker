@@ -1,8 +1,16 @@
 # Outputs file
-output "catapp_url" {
-  value = "http://${aws_eip.hashicat.public_dns}"
+output "voting-app_url" {
+  value = "http://${aws_eip.mpn.public_dns}:5000"
 }
 
-output "catapp_ip" {
-  value = "http://${aws_eip.hashicat.public_ip}"
+output "result-app_url" {
+  value = "http://${aws_eip.mpn.public_dns}:5001"
+}
+
+output "prometheus_url" {
+  value = "http://${aws_eip.mpn.public_dns}:9090"
+}
+
+output "grafana-app_url" {
+  value = "http://${aws_eip.mpn.public_dns}:3000"
 }

@@ -1,0 +1,68 @@
+version: "3"
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  voting:
+    image: voting-app:latest
+    ports:
+      - 5000:80
+    depends_on:
+      - redis
+
+  worker:
+    image: worker-app:latest
+    depends_on:
+      - redis
+      - db
+
+  result:
+    image: result-app:latest
+    ports:
+      - 5001:80
+    depends_on:
+      - db
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus:/etc/prometheus
+    depends_on:
+      - cadvisor
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor-arm64:v0.49.1
+#    hostname: cadvisor
+#    platform: linux/aarch64
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+      - db
+      - voting
+      - worker
+      - result
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
